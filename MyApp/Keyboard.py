@@ -7,5 +7,5 @@ main = ReplyKeyboardMarkup(
             KeyboardButton(text="🏆рейтинг🏆"), KeyboardButton(text="🔑магазин ключей🔑"), KeyboardButton(text="💼кейсы💼")]],
 
     resize_keyboard=True,
-    input_field_placeholder="..."
+    input_field_placeholder="Выбирай действие..."
 )
