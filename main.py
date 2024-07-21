@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 # Создание экземпляра бота
 async def main():
-    bot = Bot(token="7051918347:AAFBwpX3URN-A8XqNREESwg9QvefdGqGT80")
+    bot = Bot(token="7051918347:AAFBwpX3URN-A8XqNREESwg9QvefdGqGT800")
 
     # Создание диспетчера
     dp = Dispatcher()
