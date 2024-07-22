@@ -3,7 +3,6 @@ import logging
 from aiogram import Bot, Dispatcher
 from app.handlers import setup_routers
 
-
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
