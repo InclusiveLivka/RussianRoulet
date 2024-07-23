@@ -16,7 +16,7 @@ create_table_query = """CREATE TABLE IF NOT EXISTS users_info(
     balance_key    INTEGER,
     amount_win     INTEGER,
     prefix         TEXT,
-    ready          TEXT
+    ready          BOOLEAN
 )
 """
 
@@ -36,7 +36,7 @@ def intialize_db():
         logger.error(f"Unexpected error initializing database: {error}")
 
 
-def add_user(user_id, username, amount_rate, balance_key, amount_win, prefix,):
+def add_user(user_id, username, amount_rate, balance_key, amount_win, prefix, ready):
     try:
 
         intialize_db()
@@ -47,9 +47,9 @@ def add_user(user_id, username, amount_rate, balance_key, amount_win, prefix,):
 
 
         sql = """INSERT INTO users_info
-        (user_id, user_name, amount_rate, balance_key, amount_win, prefix)
+        (user_id, user_name, amount_rate, balance_key, amount_win, prefix, ready)
         VALUES
-        (?, ?, ?, ?, ?, ?)
+        (?, ?, ?, ?, ?, ?, ?)
         """
 
     except sqlite3.Error as error:
@@ -60,7 +60,7 @@ def add_user(user_id, username, amount_rate, balance_key, amount_win, prefix,):
 
     try:
         cursor.execute(sql, (user_id, username, amount_rate,
-                       balance_key, amount_win, prefix, ))
+                       balance_key, amount_win, prefix, ready ))
         db.commit()
 
     except sqlite3.Error as error:
@@ -105,4 +105,28 @@ def ready_tryed(user_id):
             "UPDATE users_info SET ready = 'True' WHERE user_id = ?", (user_id,))
         db.commit()
     except sqlite3.Error as error:
+        logger.error(f"Error tryed user: {error}")
+
+
+def ready_falsed(user_id):
+    try:
+        db = sqlite3.connect(DB_PATH)
+        cursor = db.cursor()
+        cursor.execute(
+            "UPDATE users_info SET ready = 'False' WHERE user_id = ?", (user_id,))
+        db.commit()
+    except sqlite3.Error as error:
+        logger.error(f"Error falsed user: {error}")
+
+
+def get_users_ready():
+    try:
+        db = sqlite3.connect(DB_PATH)
+        cursor = db.cursor()
+        cursor.execute(
+            "SELECT user_id FROM users_info WHERE ready = 'True'")
+        result = cursor.fetchall()
+        return result
+    except sqlite3.Error as error:
         logger.error(f"Error adding user: {error}")
+        return False

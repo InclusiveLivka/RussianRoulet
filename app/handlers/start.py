@@ -9,4 +9,4 @@ router = Router()
 @router.message(F.text == '/start')
 async def start(message: Message):
     await message.answer("Привет, я бот русская рулетка, давай играть?", reply_markup=kb.main)
-    add_user(message.from_user.id, message.from_user.username, 0, 0, 0, '') 
+    add_user(message.from_user.id, message.from_user.username, 0, 0, 0, 'None' , False) 
