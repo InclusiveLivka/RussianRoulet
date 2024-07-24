@@ -2,6 +2,7 @@ import asyncio
 import logging
 from aiogram import Bot, Dispatcher
 from app.handlers import setup_routers
+from app.__init__ import bot
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -10,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 # Создание экземпляра бота
 async def main():
-    bot = Bot(token="7051918347:AAFBwpX3URN-A8XqNREESwg9QvefdGqGT80")
+    
 
     # Создание диспетчера
     dp = Dispatcher()

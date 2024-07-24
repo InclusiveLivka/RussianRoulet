@@ -5,11 +5,10 @@ import sqlite3
 import time
 
 from app.database.engine import get_user,ready_falsed
-from app.game.session import start_session
+
 
 router = Router()
 
-@router.message(F.text == '🔫начать игру🔫')
-async def start_game(message: Message,enemy_profile):
-    await message.answer("🔎Начинается поиск оппонента.")
-    
+
+def write_enemy (message: Message, profile):
+    message.answer(f"Профиль оппонента:\n🏆Кол-во РР: {profile[2]}\n🔑Кол-во Ключей: {profile[3]}\n🏅Победы: {profile[4]}")
