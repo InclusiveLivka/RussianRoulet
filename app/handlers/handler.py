@@ -23,39 +23,52 @@ async def start_game(message: Message,):
         message (Message): The Telegram message object.
     """
     # Send a message to the user indicating that the search for an opponent has begun
-    await message.answer(
+    seach = await message.answer(
         "🔎 Начинается поиск оппонента.",
         reply_markup=inline.cancel
     )
-
+    seach_id = seach.message.message_id
     # Initiate the search for an opponent
+    # Get the list of ready users
     enemy_players = get_enemy(message)
     if enemy_players is not None:
         user_one, user_two = enemy_players
 
+    # If there are ready opponents, proceed with the game
         # Display the opponent's profile information
-        profile_one = get_user(user_one[0])
-        profile_str = (
-            f"👤 Профиль оппонента: {profile_one[1]}\n"
-            # Display the opponent's win count
-            f"🏆 Кол-во РР: {profile_one[2]}\n"
-            f"🏅 Победы: {profile_one[4]}\n"  # Display the opponent's win count
-            f"Префикс: {profile_one[5]}\n"  # Display the opponent's prefix
-        )
-        await message.answer(profile_str)
-
         profile_two = get_user(user_two[0])
+        print(profile_two, " - один")
         profile_two_str = (
+        # Display the opponent's profile information
             f"👤 Профиль оппонента: {profile_two[1]}\n"
             # Display the opponent's win count
             f"🏆 Кол-во РР: {profile_two[2]}\n"
             f"🏅 Победы: {profile_two[4]}\n"  # Display the opponent's win count
             f"Префикс: {profile_two[5]}\n"  # Display the opponent's prefix
         )
-        await bot.send_message(
-            chat_id=user_two[0],
-            text=profile_two_str
+        ready_falsed(user_one[0])
+        time.sleep(1)
+        await bot.edit_message_text(text="🔎 Поиск оппонента завершен.", chat_id=user_one[0],message_id=seach_id)
+        await bot.send_message(user_one[0], profile_two_str)
+        # Mark the opponent as not ready
+
+        # Send the opponent's profile information
+        profile_one = get_user(user_one[0])
+        print(profile_one, " - два")
+        profile_one_str = (
+        # Display the opponent's profile information
+            f"👤 Профиль оппонента: {profile_one[1]}\n"
+            # Display the opponent's win count
+            f"🏆 Кол-во РР: {profile_one[2]}\n"
+            f"🏅 Победы: {profile_one[4]}\n"  # Display the opponent's win count
+            f"Префикс: {profile_one[5]}\n"  # Display the opponent's prefix
         )
+        ready_falsed(user_two[0])
+        await bot.send_message(user_two[0], profile_one_str)
+        await bot.edit_message_text(text="🔎 Поиск оппонента завершен.", chat_id=user_two[0],message_id = seach_id)
+
+
+       
 
 
 @router.message(F.text == '🔫начать игру🔫')
@@ -69,34 +82,6 @@ async def start_game(message: Message,):
     """
     # Send a message to the user indicating that the search for an opponent has begun
     await message.answer("🔎Начинается поиск оппонента.", reply_markup=inline.cancel)
-
-    # Initiate the search for an opponent
-    if get_enemy(message) is not None:
-        user_one = get_enemy(message)[0]
-        profile_one = get_user(user_one[0])
-        profile_str = (
-            # Display the opponent's username
-            f"👤Профиль оппонента: {profile_one[1]}\n"
-            # Display the opponent's win count
-            f"🏆Кол-во РР: {profile_one[2]}\n"
-            # Display the opponent's win count
-            f"🏅Победы: {profile_one[4]}\n"
-            f"Префикс: {profile_one[5]}\n"  # Display the opponent's prefix
-        )
-        await message.answer(profile_str)
-    if get_enemy(message) is not None:
-        user_two = get_enemy(message)[0]
-        profile_two = get_user(user_two[0])
-        profile_two_str = (
-            # Display the opponent's username
-            f"👤Профиль оппонента: {profile_two[1]}\n"
-            # Display the opponent's win count
-            f"🏆Кол-во РР: {profile_two[2]}\n"
-            # Display the opponent's win count
-            f"🏅Победы: {profile_two[4]}\n"
-            f"Префикс: {profile_two[5]}\n"  # Display the opponent's prefix
-        )
-        await bot.send_message(chat_id=user_two, text=profile_two_str)
 
 
 @router.message(F.text == '🔘профиль🔘')

@@ -29,25 +29,20 @@ def get_enemy(message: Message) -> tuple:
     ready_users = tuple(get_users_ready())  # Get the list of ready users
 
     # Print the list of ready users for debugging purposes
-    print("Готовые пользователи:", ready_users)
 
     # If there are more than one ready users, select two randomly
     if len(ready_users) > 1:
         users_in_game = random.sample(ready_users, k=2)  # Select two randomly
         # Find the enemy player by excluding the current player
         for user in users_in_game:
-            print(user)
+
             if user[0] != message.from_user.id:
                 user_one = user
-                print("юзер 1", user_one)
-            elif user[0] == message.from_user.id:
+
+            else:
                 user_two = user
-                print("юзер 2", user_two)
 
-        return  user_one, user_two
-
-        
-
+        return user_one, user_two
 
         # # Send the enemy player's profile information to the user
         # message.answer(profile_str)  # Send the profile information to the user
