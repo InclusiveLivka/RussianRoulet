@@ -1,13 +1,15 @@
-from aiogram import F, Router, types, Bot
+from aiogram import F, Router, types
 from aiogram.types import Message, CallbackQuery
 import app.keyboard.reply as kb
 import sqlite3
 import time
+from time import monotonic
 
 from app.__init__ import bot
 from app.keyboard import inline
 from app.database.engine import get_user, ready_falsed
 from app.game.session import get_enemy
+from app.game.game import game
 
 
 router = Router()
@@ -24,22 +26,25 @@ async def start_game(message: Message,):
     """
     # Send a message to the user indicating that the search for an opponent has begun
     seach = await message.answer(
-        "🔎 Начинается поиск оппонента.",
-        reply_markup=inline.cancel
+        "🔎 Начинается поиск оппонента."
     )
-    seach_id = seach.message.message_id
     # Initiate the search for an opponent
     # Get the list of ready users
+    
     enemy_players = get_enemy(message)
     if enemy_players is not None:
         user_one, user_two = enemy_players
 
+
+
+
     # If there are ready opponents, proceed with the game
         # Display the opponent's profile information
+        hideBoard = types.ReplyKeyboardRemove()
         profile_two = get_user(user_two[0])
         print(profile_two, " - один")
         profile_two_str = (
-        # Display the opponent's profile information
+            # Display the opponent's profile information
             f"👤 Профиль оппонента: {profile_two[1]}\n"
             # Display the opponent's win count
             f"🏆 Кол-во РР: {profile_two[2]}\n"
@@ -47,8 +52,7 @@ async def start_game(message: Message,):
             f"Префикс: {profile_two[5]}\n"  # Display the opponent's prefix
         )
         ready_falsed(user_one[0])
-        time.sleep(1)
-        await bot.edit_message_text(text="🔎 Поиск оппонента завершен.", chat_id=user_one[0],message_id=seach_id)
+        await bot.send_message(user_one[0], "✅ Поиск оппонента завершен.", reply_markup=hideBoard)
         await bot.send_message(user_one[0], profile_two_str)
         # Mark the opponent as not ready
 
@@ -56,7 +60,7 @@ async def start_game(message: Message,):
         profile_one = get_user(user_one[0])
         print(profile_one, " - два")
         profile_one_str = (
-        # Display the opponent's profile information
+            # Display the opponent's profile information
             f"👤 Профиль оппонента: {profile_one[1]}\n"
             # Display the opponent's win count
             f"🏆 Кол-во РР: {profile_one[2]}\n"
@@ -64,11 +68,9 @@ async def start_game(message: Message,):
             f"Префикс: {profile_one[5]}\n"  # Display the opponent's prefix
         )
         ready_falsed(user_two[0])
+        await bot.send_message(user_two[0], "✅ Поиск оппонента завершен.", reply_markup=hideBoard)
         await bot.send_message(user_two[0], profile_one_str)
-        await bot.edit_message_text(text="🔎 Поиск оппонента завершен.", chat_id=user_two[0],message_id = seach_id)
-
-
-       
+        await game(enemy_players)
 
 
 @router.message(F.text == '🔫начать игру🔫')
@@ -81,7 +83,7 @@ async def start_game(message: Message,):
         message (Message): The Telegram message object.
     """
     # Send a message to the user indicating that the search for an opponent has begun
-    await message.answer("🔎Начинается поиск оппонента.", reply_markup=inline.cancel)
+    await message.answer("🔎Начинается поиск оппонента.")
 
 
 @router.message(F.text == '🔘профиль🔘')
