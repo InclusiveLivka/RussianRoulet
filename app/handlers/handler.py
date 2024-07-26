@@ -3,20 +3,21 @@ from aiogram.types import Message, CallbackQuery
 import app.keyboard.reply as kb
 import sqlite3
 import time
+import random
+from app.handlers.game_handlers import choise
 from time import monotonic
 
 from app.__init__ import bot
 from app.keyboard import inline
 from app.database.engine import get_user, ready_falsed
 from app.game.session import get_enemy
-from app.game.game import game
+from app.game.game import shoot_self, game
 
 
 router = Router()
 
-
 @router.message(F.text == '🔫начать игру🔫')
-async def start_game(message: Message,):
+async def start_game(message: Message):
     """
     Handles the "/start_game" command. 
     Sends a message to start the game and initiates the search for an opponent.
@@ -25,52 +26,47 @@ async def start_game(message: Message,):
         message (Message): The Telegram message object.
     """
     # Send a message to the user indicating that the search for an opponent has begun
-    seach = await message.answer(
-        "🔎 Начинается поиск оппонента."
-    )
+    search = await message.answer("🔎 Начинается поиск оппонента.")
+
     # Initiate the search for an opponent
-    # Get the list of ready users
+    enemy_players = get_enemy(message)  # Функция должна возвращать список из 2 игроков
+    if enemy_players is None or len(enemy_players) < 2:
+        await message.answer("❌ Не удалось найти оппонента. Попробуйте позже.")
+        return
+
+    user_one, user_two = enemy_players
+
+    # Display the opponent's profile information
+    hideBoard = types.ReplyKeyboardRemove()
     
-    enemy_players = get_enemy(message)
-    if enemy_players is not None:
-        user_one, user_two = enemy_players
+    # Получаем профили игроков
+    profile_one = get_user(user_one[0])
+    profile_two = get_user(user_two[0])
+    
+    profile_one_str = (
+        f"👤 Профиль: {profile_one[1]}\n"
+        f"🏆 Кол-во РР: {profile_one[2]}\n"
+        f"🏅 Победы: {profile_one[4]}\n"
+        f"Префикс: {profile_one[5]}\n"
+    )
 
+    profile_two_str = (
+        f"👤 Профиль: {profile_two[1]}\n"
+        f"🏆 Кол-во РР: {profile_two[2]}\n"
+        f"🏅 Победы: {profile_two[4]}\n"
+        f"Префикс: {profile_two[5]}\n"
+    )
 
+    # Уведомляем игроков о завершении поиска
+    await bot.send_message(user_one[0], "✅ Поиск оппонента завершен.", reply_markup=hideBoard)
+    await bot.send_message(user_one[0], profile_two_str)
 
+    await bot.send_message(user_two[0], "✅ Поиск оппонента завершен.", reply_markup=hideBoard)
+    await bot.send_message(user_two[0], profile_one_str)
 
-    # If there are ready opponents, proceed with the game
-        # Display the opponent's profile information
-        hideBoard = types.ReplyKeyboardRemove()
-        profile_two = get_user(user_two[0])
-        print(profile_two, " - один")
-        profile_two_str = (
-            # Display the opponent's profile information
-            f"👤 Профиль оппонента: {profile_two[1]}\n"
-            # Display the opponent's win count
-            f"🏆 Кол-во РР: {profile_two[2]}\n"
-            f"🏅 Победы: {profile_two[4]}\n"  # Display the opponent's win count
-            f"Префикс: {profile_two[5]}\n"  # Display the opponent's prefix
-        )
-        ready_falsed(user_one[0])
-        await bot.send_message(user_one[0], "✅ Поиск оппонента завершен.", reply_markup=hideBoard)
-        await bot.send_message(user_one[0], profile_two_str)
-        # Mark the opponent as not ready
-
-        # Send the opponent's profile information
-        profile_one = get_user(user_one[0])
-        print(profile_one, " - два")
-        profile_one_str = (
-            # Display the opponent's profile information
-            f"👤 Профиль оппонента: {profile_one[1]}\n"
-            # Display the opponent's win count
-            f"🏆 Кол-во РР: {profile_one[2]}\n"
-            f"🏅 Победы: {profile_one[4]}\n"  # Display the opponent's win count
-            f"Префикс: {profile_one[5]}\n"  # Display the opponent's prefix
-        )
-        ready_falsed(user_two[0])
-        await bot.send_message(user_two[0], "✅ Поиск оппонента завершен.", reply_markup=hideBoard)
-        await bot.send_message(user_two[0], profile_one_str)
-        await game(enemy_players)
+    # Запускаем игру с двумя игроками
+    user_one, user_two = enemy_players
+    await game(enemy_players)  # Убедитесь, что game принимает список игроков
 
 
 @router.message(F.text == '🔫начать игру🔫')
@@ -124,3 +120,6 @@ async def cancel(callback: types.CallbackQuery):
 
     # Mark the user as not ready for the game
     ready_falsed(callback.from_user.id)
+
+
+
