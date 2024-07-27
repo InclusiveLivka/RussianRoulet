@@ -4,7 +4,7 @@ import logging
 import random
 
 from app.database.engine import get_user, ready_tryed, ready_falsed, get_users_ready
-from app.game.game import game
+from app.game.game import start_game
 router = Router()
 
 

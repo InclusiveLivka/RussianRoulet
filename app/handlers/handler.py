@@ -11,38 +11,33 @@ from app.__init__ import bot
 from app.keyboard import inline
 from app.database.engine import get_user, ready_falsed
 from app.game.session import get_enemy
-from app.game.game import shoot_self, game
+from app.game.game import start_game
 
 
 router = Router()
 
 @router.message(F.text == '🔫начать игру🔫')
-async def start_game(message: Message):
+async def start(message: Message):
     """
-    Handles the "/start_game" command. 
+    Handles the start game command. 
     Sends a message to start the game and initiates the search for an opponent.
-
-    Args:
-        message (Message): The Telegram message object.
     """
     # Send a message to the user indicating that the search for an opponent has begun
     search = await message.answer("🔎 Начинается поиск оппонента.")
 
     # Initiate the search for an opponent
-    enemy_players = get_enemy(message)  # Функция должна возвращать список из 2 игроков
-    if enemy_players is None or len(enemy_players) < 2:
-        await message.answer("❌ Не удалось найти оппонента. Попробуйте позже.")
-        return
+    enemy_players = get_enemy(message)
+    print(enemy_players)  # Функция должна возвращать список из 2 игроков
 
     user_one, user_two = enemy_players
 
     # Display the opponent's profile information
     hideBoard = types.ReplyKeyboardRemove()
-    
+
     # Получаем профили игроков
     profile_one = get_user(user_one[0])
     profile_two = get_user(user_two[0])
-    
+
     profile_one_str = (
         f"👤 Профиль: {profile_one[1]}\n"
         f"🏆 Кол-во РР: {profile_one[2]}\n"
@@ -65,21 +60,11 @@ async def start_game(message: Message):
     await bot.send_message(user_two[0], profile_one_str)
 
     # Запускаем игру с двумя игроками
-    user_one, user_two = enemy_players
-    await game(enemy_players)  # Убедитесь, что game принимает список игроков
+    await start_game(enemy_players)  # Запуск игры с противниками
+    ready_falsed(user_one[0])
+    ready_falsed(user_two[0])
 
 
-@router.message(F.text == '🔫начать игру🔫')
-async def start_game(message: Message,):
-    """
-    Handles the "/start_game" command. 
-    Sends a message to start the game and initiates the search for an opponent.
-
-    Args:
-        message (Message): The Telegram message object.
-    """
-    # Send a message to the user indicating that the search for an opponent has begun
-    await message.answer("🔎Начинается поиск оппонента.")
 
 
 @router.message(F.text == '🔘профиль🔘')
