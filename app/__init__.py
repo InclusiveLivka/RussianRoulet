@@ -1,5 +1,9 @@
 from .handlers import handler
 from .keyboard import reply
 from aiogram import Bot
+from dotenv import load_dotenv, find_dotenv
+import os
 
-bot = Bot(token="7051918347:AAFBwpX3URN-A8XqNREESwg9QvefdGqGT80")
+
+load_dotenv(find_dotenv())
+bot = Bot(os.getenv("TOKEN"))
